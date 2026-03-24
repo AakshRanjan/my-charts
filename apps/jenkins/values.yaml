@@ -1,0 +1,36 @@
+persistence:
+  enabled: true
+  size: 64Gi
+  storageClass: longhorn
+
+controller:
+  image:
+    pullPolicy: IfNotPresent
+
+  # Cloudflare terminates TLS; nginx sees HTTP — still advertise HTTPS to Jenkins.
+  jenkinsUrlProtocol: https
+
+  ingress:
+    enabled: true
+    apiVersion: networking.k8s.io/v1
+    ingressClassName: nginx
+    hostName: jenkins.aakshranjan.com
+    path: /
+    pathType: Prefix
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-body-size: 10000m
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+  javaOpts: "-Xms256m -Xmx1536m"

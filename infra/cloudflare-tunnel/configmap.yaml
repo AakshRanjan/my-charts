@@ -12,4 +12,6 @@ data:
         service: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local:80
       - hostname: grafana.aakshranjan.com
         service: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local:80
+      - hostname: jenkins.aakshranjan.com
+        service: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local:80
       - service: http_status:404
