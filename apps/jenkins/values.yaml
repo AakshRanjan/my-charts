@@ -9,6 +9,8 @@ controller:
 
   # Cloudflare terminates TLS; nginx sees HTTP — still advertise HTTPS to Jenkins.
   jenkinsUrlProtocol: https
+  # Required for correct redirects and “reverse proxy setup” health (matches browser URL).
+  jenkinsUrl: https://jenkins.aakshranjan.com/
 
   ingress:
     enabled: true
@@ -18,6 +20,12 @@ controller:
     path: /
     pathType: Prefix
     annotations:
+      # Tunnel often hits nginx on :80 ($scheme=http). Last proxy_set_header wins for upstream.
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        proxy_set_header X-Forwarded-Proto "https";
+        proxy_set_header X-Forwarded-Port "443";
+        proxy_set_header X-Forwarded-Scheme "https";
+        proxy_set_header X-Scheme "https";
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
@@ -34,3 +42,12 @@ controller:
       memory: 2Gi
 
   javaOpts: "-Xms256m -Xmx1536m"
+
+  # Cloudflare dashboard ingress often overrides ConfigMap and keeps HTTP→nginx; headers above fix
+  # redirects. If the UI monitor still warns falsely, disable it (see JENKINS-56937 / JCasC docs).
+  JCasC:
+    configScripts:
+      disable-reverse-proxy-monitor: |
+        jenkins:
+          disabledAdministrativeMonitors:
+            - "hudson.diagnosis.ReverseProxySetupMonitor"

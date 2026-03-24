@@ -1,0 +1,6 @@
+# Snippet annotations: required for Jenkins behind Cloudflare Tunnel on HTTP→nginx (see apps/jenkins).
+# https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations-risk/
+controller:
+  allowSnippetAnnotations: true
+  config:
+    annotations-risk-level: Critical

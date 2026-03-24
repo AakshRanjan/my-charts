@@ -4,6 +4,10 @@ metadata:
   name: cloudflare-tunnel-config
   namespace: cloudflare
 data:
+  # NOTE: With TUNNEL_TOKEN, Cloudflare may push ingress from the Zero Trust dashboard and
+  # override the routes below (check cloudflared logs: "Updated to new configuration").
+  # Either set Jenkins public hostname in the dashboard to https://…:443 + no TLS verify, or
+  # rely on nginx configuration-snippet on the Jenkins Ingress (apps/jenkins/values.yaml).
   config.yaml: |
     ingress:
       - hostname: httpbin.aakshranjan.com
@@ -12,6 +16,9 @@ data:
         service: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local:80
       - hostname: grafana.aakshranjan.com
         service: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local:80
+      # HTTPS to ingress so nginx $scheme is https → X-Forwarded-Proto is correct for Jenkins.
       - hostname: jenkins.aakshranjan.com
-        service: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local:80
+        service: https://ingress-nginx-controller.ingress-nginx.svc.cluster.local:443
+        originRequest:
+          noTLSVerify: true
       - service: http_status:404
